@@ -39,16 +39,6 @@
       form.find(".cp-item-controls").remove();
     }, 250);
 
-    // Horrible hack to append 'ct_id' ContentType ID parameter to form action
-    // URL, which cannot be easily done another way without re-implementing all
-    // of VersionAdmin.render_revision_form where 'form_url' is set.
-    // TODO Move this into customized VersionAdmin.render_revision_form by
-    // changing 'form_url' to use request.get_full_path() not request.path.
-    if (window.content_type_id) {
-        var form_action_url = form.attr('action');
-        form.attr('action', form_action_url + '?ct_id=' + window.content_type_id);
-    }
-
   });
 })(django.jQuery);
 
