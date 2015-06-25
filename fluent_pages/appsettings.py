@@ -34,6 +34,9 @@ FLUENT_PAGES_CHILD_ADMIN_MIXIN = getattr(settings, 'FLUENT_PAGES_CHILD_ADMIN_MIX
 
 ROBOTS_TXT_DISALLOW_ALL = getattr(settings, 'ROBOTS_TXT_DISALLOW_ALL', settings.DEBUG)
 
+# Reversion integration settings
+FLUENT_PAGES_DISABLE_REVERSION = getattr(settings, 'FLUENT_PAGES_DISABLE_REVERSION', False)
+
 
 # Checks
 if not FLUENT_PAGES_TEMPLATE_DIR:

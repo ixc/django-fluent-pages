@@ -1,7 +1,14 @@
 from django.utils.safestring import mark_safe
 from fluent_pages.extensions import PageTypePlugin, page_type_pool
-from fluent_pages.pagetypes.flatpage.admin import FlatPageAdmin
+from fluent_pages.integration.django_reversion import enable_reversion_support
 from fluent_pages.pagetypes.flatpage.models import FlatPage
+
+
+if enable_reversion_support():
+    from fluent_pages.integration.django_reversion.admin \
+        import ReversionFlatPageAdmin as FlatPageAdmin
+else:
+    from fluent_pages.pagetypes.flatpage.admin import FlatPageAdmin
 
 
 @page_type_pool.register

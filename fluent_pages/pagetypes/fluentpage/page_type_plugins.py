@@ -1,7 +1,14 @@
 from fluent_pages.extensions import page_type_pool
+from fluent_pages.integration.django_reversion import enable_reversion_support
 from fluent_pages.integration.fluent_contents.page_type_plugins import FluentContentsPagePlugin
 from .models import FluentPage
-from .admin import FluentPageAdmin
+
+
+if enable_reversion_support():
+    from fluent_pages.integration.django_reversion.admin \
+        import ReversionFluentPageAdmin as FluentPageAdmin
+else:
+    from .admin import FluentPageAdmin
 
 
 @page_type_pool.register

@@ -1,0 +1,26 @@
+{% extends 'reversion/recover_form.html' %}
+{% load i18n %}
+
+{# TODO Default breadcrumbs currently break with app_list:sfmoma reverse URL errors #}
+{% block breadcrumbs %}{% endblock %}
+
+{% block form_top %}
+    <p>{% blocktrans %}Press the Restore button below to recover this version of the object.{% endblocktrans %}</p>
+{% endblock %}
+
+{% block submit_buttons_bottom %}
+<div class="submit-row">
+  <input type="submit" value="Restore" class="default" name="_save">
+</div>
+
+<script type="text/javascript">
+window.is_reversion_form = true;
+window.content_type_id = {{ content_type_id }};
+</script>
+{% endblock %}
+
+{% block admin_change_form_document_ready %}
+{{ block.super }}
+
+</script>
+{% endblock %}

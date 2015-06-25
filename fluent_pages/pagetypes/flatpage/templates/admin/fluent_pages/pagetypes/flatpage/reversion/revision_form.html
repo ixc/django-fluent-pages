@@ -1,0 +1,20 @@
+{% extends 'reversion/revision_form.html' %}
+{% load i18n %}
+
+{# TODO Default breadcrumbs currently break with app_list:sfmoma reverse URL errors #}
+{% block breadcrumbs %}{% endblock %}
+
+{% block form_top %}
+    <p>{% blocktrans %}Press the Revert button below to restore this version of the object.{% endblocktrans %}</p>
+{% endblock %}
+
+{% block submit_buttons_bottom %}
+<div class="submit-row">
+  <input type="submit" value="Revert" class="default" name="_save">
+</div>
+
+<script type="text/javascript">
+window.is_reversion_form = true;
+</script>
+{% endblock %}
+
