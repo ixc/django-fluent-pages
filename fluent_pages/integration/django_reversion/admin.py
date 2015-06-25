@@ -45,6 +45,18 @@ class _BaseFluentVersionAdmin(VersionAdmin):
         )
         return reversion_urls + urls
 
+    def _perform_strict_revert(self, request, obj, version, context,
+                               revert=False, recover=False):
+        """
+        Override handling of strict revert: delete object in advance to clean
+        up obsolete relationships rather than relying on django-reversion's
+        `delete=True` flag to `version.revision.revert()` which does not
+        properly handle the complex object reltionships for versioned Fluent
+        pages.
+        """
+        obj.delete()
+        version.revision.revert()
+    
     def _dict_fields(self, data, *field_names):
         """
         Return a dict subset of the given data dict populated with only
