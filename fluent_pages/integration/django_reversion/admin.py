@@ -88,19 +88,22 @@ class _BaseFluentVersionAdmin(VersionAdmin):
             # Translations - get translated field values for current language
             elif ctype_key == (u'fluent_pages', u'urlnode_translation'):
                 if data.get('language_code') == lang:
-                    obj_data.update(self._dict_fields(data,
-                        'title', 'slug', 'override_url'))
+                    obj_data.update(self._dict_fields(
+                        data, 'title', 'slug', 'override_url'))
             elif ctype_key == (u'fluent_pages', u'htmlpagetranslation'):
                 if data.get('language_code') == lang:
-                    obj_data.update(self._dict_fields(data,
-                        'meta_title', 'meta_keywords', 'meta_description'))
+                    obj_data.update(self._dict_fields(
+                        data, 'meta_title', 'meta_keywords',
+                        'meta_description'))
 
-            # TODO Is there a nicer, more generic way of handling these cases?
-            # Recognize FlatPage and retrieve its content
-            elif ctype_key == (u'flatpage', u'flatpage'):
+            # TODO These are super-generic hooks to find data we need to roll
+            # up into the overall object data, maybe too generic...
+
+            # Recognise items like FlatPage that contain `content`
+            elif data.get('content') and 'content' not in obj_data:
                 obj_data.update(self._dict_fields(data, 'content'))
-            # Recognize  FluentPage and include layout field
-            elif ctype_key == (u'fluentpage', u'fluentpage'):
+            # Recognise items like FluentPage that contain `layout`
+            elif data.get('layout') and 'layout' not in obj_data:
                 obj_data.update(self._dict_fields(data, 'layout'))
 
         return obj_data
