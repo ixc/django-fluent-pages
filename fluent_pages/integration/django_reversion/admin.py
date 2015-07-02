@@ -136,10 +136,10 @@ class ReversionFluentContentsPageAdmin(_BaseFluentVersionAdmin,
         # Hack to add required 'layout' foreign key field to deserialised
         # object when restoring deleted items, in which case we don't have
         # a real object to start with.
-        if not getattr(obj, 'layout', None) and 'layout' in obj_data:
+        if not getattr(obj, 'layout', None):
             try:
                 obj.layout = PageLayout.objects.get(pk=obj_data['layout'])
-            except PageLayout.DoesNotExist:
+            except Exception:
                 obj.layout = None
 
         return obj_data
