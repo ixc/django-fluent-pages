@@ -97,15 +97,18 @@ class _BaseFluentVersionAdmin(VersionAdmin):
                         data, 'meta_title', 'meta_keywords',
                         'meta_description'))
 
-            # TODO These are super-generic hooks to find data we need to roll
-            # up into the overall object data, maybe too generic...
-
-            # Recognise items like FlatPage that contain `content`
-            elif data.get('content') and 'content' not in obj_data:
-                obj_data.update(self._dict_fields(data, 'content'))
-            # Recognise items like FluentPage that contain `layout`
-            elif data.get('layout') and 'layout' not in obj_data:
-                obj_data.update(self._dict_fields(data, 'layout'))
+            # Brute-force copy of any data from other items that is not
+            # already present in our form data.
+            # TODO This is a naive merge of all data into a single overall dict
+            # which could overwrite good data with bad, or ignore good data
+            # that comes after bad. Is there a better way to do this?
+            else:
+                additional_data = dict([
+                    (k, v) for k, v in data.items()
+                    # Key is not present in obj_data, or value differs
+                    if k not in obj_data or v != obj_data[k]
+                ])
+                obj_data.update(additional_data)
 
         return obj_data
 
