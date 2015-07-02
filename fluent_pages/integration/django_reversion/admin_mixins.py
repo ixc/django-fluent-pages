@@ -1,4 +1,4 @@
-# NOTE: This module exists for Fluent admin mixins because in you cannot import
+# NOTE: This module exists for Fluent admin mixins because you cannot import
 # FluentPageAdmin etc implementations in a module that also contains mixins
 from reversion.admin import VersionAdmin
 
@@ -33,4 +33,3 @@ class FluentReversionAdminMixin(VersionAdmin):
                 name='%s_%s_recoverlist' % info),
         )
         return reversion_urls + urls
-

@@ -4,6 +4,7 @@ from django.utils.translation import get_language
 
 from reversion.admin import VersionAdmin
 
+from fluent_pages.integration.fluent_contents.admin import FluentContentsPageAdmin
 from fluent_pages.pagetypes.fluentpage.admin import FluentPageAdmin
 from fluent_pages.pagetypes.flatpage.admin import FlatPageAdmin
 from fluent_pages.models import PageLayout
@@ -118,13 +119,18 @@ class ReversionFlatPageAdmin(_BaseFluentVersionAdmin, FlatPageAdmin):
     recover_form_template = 'admin/fluent_pages/pagetypes/flatpage/reversion/recover_form.html'
 
 
-class ReversionFluentPageAdmin(_BaseFluentVersionAdmin, FluentPageAdmin):
+class ReversionFluentContentsPageAdmin(_BaseFluentVersionAdmin,
+                                       FluentContentsPageAdmin):
 
     revision_form_template = 'admin/fluentpage/reversion/revision_form.html'
     recover_form_template = 'admin/fluentpage/reversion/recover_form.html'
 
+    #: The default template name, which is available in the template context.
+    #: Use ``{% extend base_change_form_template %}`` in templates to inherit from it.
+    base_change_form_template = "admin/fluent_pages/page/base_change_form.html"
+
     def get_revision_form_data(self, request, obj, version):
-        obj_data = super(ReversionFluentPageAdmin, self) \
+        obj_data = super(ReversionFluentContentsPageAdmin, self) \
             .get_revision_form_data(request, obj, version)
 
         # Hack to add required 'layout' foreign key field to deserialised
@@ -141,7 +147,7 @@ class ReversionFluentPageAdmin(_BaseFluentVersionAdmin, FluentPageAdmin):
     # Extend VersionAdmin#_introspect_inline_admin
     def _introspect_inline_admin(self, inline):
         inline_model, follow_field = \
-            super(ReversionFluentPageAdmin, self) \
+            super(ReversionFluentContentsPageAdmin, self) \
                 ._introspect_inline_admin(inline)
 
         # Hack to always include ContentItem inlines available via
@@ -156,11 +162,17 @@ class ReversionFluentPageAdmin(_BaseFluentVersionAdmin, FluentPageAdmin):
     def render_revision_form(self, request, obj, version, context,
                              revert=False, recover=False):
         context.update({
-            'base_change_form_template': 'admin/fluent_pages/integration/fluent_contents/base_change_form.html',
-            'default_change_form_template': 'admin/fluentpage/change_form.html',
-            'ct_id': int(ContentType.objects.get_for_model(obj).pk), # HACK for polymorphic admin
+            'base_change_form_template': self.base_change_form_template,
+            'default_change_form_template': self.change_form_template,
+            # HACK for polymorphic admin
+            'ct_id': int(ContentType.objects.get_for_model(obj).pk),
         })
-        result = super(ReversionFluentPageAdmin, self) \
+        result = super(ReversionFluentContentsPageAdmin, self) \
             .render_revision_form(request, obj, version, context,
                                   revert=revert, recover=recover)
         return result
+
+
+class ReversionFluentPageAdmin(ReversionFluentContentsPageAdmin,
+                               FluentPageAdmin):
+    pass
