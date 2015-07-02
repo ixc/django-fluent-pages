@@ -128,7 +128,10 @@ class ReversionFluentPageAdmin(_BaseFluentVersionAdmin, FluentPageAdmin):
         # object when restoring deleted items, in which case we don't have
         # a real object to start with.
         if not getattr(obj, 'layout', None) and 'layout' in obj_data:
-            obj.layout = PageLayout.objects.get(pk=obj_data['layout'])
+            try:
+                obj.layout = PageLayout.objects.get(pk=obj_data['layout'])
+            except PageLayout.DoesNotExist:
+                obj.layout = None
 
         return obj_data
 
