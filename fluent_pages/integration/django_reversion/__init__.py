@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from fluent_pages import appsettings
 
 
@@ -13,5 +15,8 @@ def enable_reversion_support():
     """
     Return True if django-reversion is installed and should be enabled.
     """
-    return IS_REVERSION_INSTALLED \
+    return (
+        IS_REVERSION_INSTALLED
+        and 'reversion' in getattr(settings, 'INSTALLED_APPS', [])
         and not appsettings.FLUENT_PAGES_DISABLE_REVERSION
+    )
