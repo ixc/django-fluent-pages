@@ -12,7 +12,7 @@ from fluent_pages.models import PageLayout
 from .utils import fluent_revision_manager
 
 
-class _BaseFluentVersionAdmin(VersionAdmin):
+class BaseFluentVersionAdmin(VersionAdmin):
     """
     Base class for customizing django-reversion's VersionAdmin for Fluent
     page types.
@@ -20,11 +20,13 @@ class _BaseFluentVersionAdmin(VersionAdmin):
 
     revision_manager = fluent_revision_manager
 
+    strict_revert = True
+
     # Override VersionAdmin get_urls to return extra fake-ish URLs necessary
     # to support url reversal for "parent"-specific URL paths through this
     # admin which operates in context of a "child" admin.
     def get_urls(self):
-        urls = super(_BaseFluentVersionAdmin, self).get_urls()
+        urls = super(BaseFluentVersionAdmin, self).get_urls()
 
         # Hack to also register alternate 'fluent_pages_page_XYZ' URL names to
         # work with URL lookups on history/recovery pages from *parent* admin
@@ -57,13 +59,13 @@ class _BaseFluentVersionAdmin(VersionAdmin):
         """
         obj.delete()
         version.revision.revert()
-    
+
     def _dict_fields(self, data, *field_names):
         """
         Return a dict subset of the given data dict populated with only
         the specified field names.
         """
-        return dict((n,v) for (n,v) in data.items() if n in field_names)
+        return dict((n, v) for (n, v) in data.items() if n in field_names)
 
     def get_revision_form_data(self, request, obj, version):
         """
@@ -71,7 +73,7 @@ class _BaseFluentVersionAdmin(VersionAdmin):
         from versioned object relationships it doesn't traverse itself, in
         particular from proxy objects and django-parler translated fields.
         """
-        obj_data = super(_BaseFluentVersionAdmin, self) \
+        obj_data = super(BaseFluentVersionAdmin, self) \
             .get_revision_form_data(request, obj, version)
         lang = get_language()
 
@@ -116,13 +118,13 @@ class _BaseFluentVersionAdmin(VersionAdmin):
         js = ('fluent_pages/admin/integration/reversion/fix-reversion-form.js',)
 
 
-class ReversionFlatPageAdmin(_BaseFluentVersionAdmin, FlatPageAdmin):
+class ReversionFlatPageAdmin(BaseFluentVersionAdmin, FlatPageAdmin):
 
     revision_form_template = 'admin/fluent_pages/pagetypes/flatpage/reversion/revision_form.html'
     recover_form_template = 'admin/fluent_pages/pagetypes/flatpage/reversion/recover_form.html'
 
 
-class ReversionFluentContentsPageAdmin(_BaseFluentVersionAdmin,
+class ReversionFluentContentsPageAdmin(BaseFluentVersionAdmin,
                                        FluentContentsPageAdmin):
 
     revision_form_template = 'admin/fluentpage/reversion/revision_form.html'
