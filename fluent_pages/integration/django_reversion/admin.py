@@ -8,6 +8,7 @@ from fluent_pages.integration.fluent_contents.admin import FluentContentsPageAdm
 from fluent_pages.pagetypes.fluentpage.admin import FluentPageAdmin
 from fluent_pages.pagetypes.flatpage.admin import FlatPageAdmin
 from fluent_pages.models import PageLayout
+from fluent_contents.models import ContentItem, Placeholder
 
 from .utils import fluent_revision_manager
 
@@ -99,12 +100,19 @@ class BaseFluentVersionAdmin(VersionAdmin):
                         data, 'meta_title', 'meta_keywords',
                         'meta_description'))
 
-            # Brute-force copy of any data from other items that is not
-            # already present in our form data.
-            # TODO This is a naive merge of all data into a single overall dict
-            # which could overwrite good data with bad, or ignore good data
-            # that comes after bad. Is there a better way to do this?
+            # Brute-force copy of any data from other top-level items where the
+            # data are not already present in our form data.
+            # TODO This is a somewhat naive merge of all data into a single
+            # overall dict which could overwrite good data with bad, or ignore
+            # good data that comes after bad. Is there a better way to do this?
             else:
+                # Skip items that aren't at the "top" level to avoid polluting
+                # the main object's data, which means we skip placeholder or
+                # content items, since these are handled by form inlines.
+                rel_ver_model = rel_ver.content_type.model_class()
+                if issubclass(rel_ver_model, (ContentItem, Placeholder)):
+                    continue
+
                 additional_data = dict([
                     (k, v) for k, v in data.items()
                     # Key is not present in obj_data, or value differs
