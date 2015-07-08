@@ -150,8 +150,19 @@ class ReversionFluentContentsPageAdmin(BaseFluentVersionAdmin,
         # object when restoring deleted items, in which case we don't have
         # a real object to start with.
         if not getattr(obj, 'layout', None):
+            # Find current layout foreign key field from set of version objects
+            # Necessary because customised pages may be associated with page
+            # layouts other than the default `fluent_pages.models.PageLayout`
+            layout_fk_field = None
+            for ver in version.revision.version_set.all():
+                # Deserialize version data into object
+                ver_obj = ver.object_version.object
+                if 'layout_id' in ver_obj._meta.get_all_field_names():
+                    layout_fk_field = ver_obj._meta.get_field('layout')
+                    break
             try:
-                obj.layout = PageLayout.objects.get(pk=obj_data['layout'])
+                obj.layout = layout_fk_field.rel.to.objects.get(
+                    pk=obj_data['layout'])
             except Exception:
                 obj.layout = None
 
