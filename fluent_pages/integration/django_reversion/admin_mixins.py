@@ -4,8 +4,6 @@ from reversion.admin import VersionAdmin
 
 from django.conf.urls import patterns, url
 
-from .utils import fluent_revision_manager
-
 
 class FluentReversionAdminMixin(VersionAdmin):
     """
@@ -14,8 +12,6 @@ class FluentReversionAdminMixin(VersionAdmin):
     which is anywhere django-fluent-pages cannot identify the exact page type
     of the item we are working on.
     """
-
-    revision_manager = fluent_revision_manager
 
     def get_urls(self):
         """

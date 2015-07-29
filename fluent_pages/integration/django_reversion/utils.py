@@ -23,8 +23,8 @@ class FluentVersionAdapter(reversion.VersionAdapter):
     # for django-fluent-pages and django-fluent-content.
     follow_if_present = (
         'urlnode_ptr',  # Pointer to UrlNode proxy model from page
-        'contentitem_set', # ContentItem's associated with a page
-        'contentitem_ptr', # Pointer to ContentItem proxy model for items
+        'contentitem_set',  # ContentItem's associated with a page
+        'contentitem_ptr',  # Pointer to ContentItem proxy model for items
         'placeholder',  # Placeholder for content items
         '_parler_meta',  # django-parler meta data for translated fields
     )
@@ -55,7 +55,7 @@ class FluentVersionAdapter(reversion.VersionAdapter):
                         self._update_cache,
                         sender=parler_meta.model,
                         dispatch_uid='FluentVersionAdapter._update_cache.%s'
-                                    % parler_meta.rel_name)
+                                     % parler_meta.rel_name)
             # If model has named attribute, follow it
             else:
                 follow_set.add(attr_name)
@@ -69,11 +69,3 @@ class FluentVersionAdapter(reversion.VersionAdapter):
             # Raw is set to true (only) when restoring from fixtures or,
             # django-reversion
             cache._cache_translation(instance)
-
-
-# Revision manager configured to use our custom adapter which automatically
-# follows important relationships, and to auto-register models as they are
-# encountered through these followed relationships.
-fluent_revision_manager = \
-    reversion.revisions.AutoRegisterRevisionManager(
-        manager_slug='fluent-pages', adapter_cls=FluentVersionAdapter)
