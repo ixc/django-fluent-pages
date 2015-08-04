@@ -35,7 +35,6 @@ class BaseFluentVersionAdmin(VersionAdmin):
                 for parler_meta in model._parler_meta:
                     follow.append(parler_meta.rel_name)
                     self._autoregister(parler_meta.model)
-            print "Registering %r following=%r" % (model, follow)
             self.revision_manager.register(model, follow=follow,
                                            format=self.reversion_format,
                                            adapter_cls=FluentVersionAdapter)
