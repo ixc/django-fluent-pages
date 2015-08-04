@@ -27,6 +27,9 @@ class FluentVersionAdapter(reversion.VersionAdapter):
         'contentitem_ptr',  # Pointer to ContentItem proxy model for items
         'placeholder',  # Placeholder for content items
         '_parler_meta',  # django-parler meta data for translated fields
+
+        # Built-in support for external libraries
+        'publisher_linked',  # django-model-publisher 1-to-1 to published page
     )
 
     def __init__(self, model):
