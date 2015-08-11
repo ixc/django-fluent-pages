@@ -14,6 +14,11 @@ class BaseFluentVersionAdmin(VersionAdmin):
     page types.
     """
 
+    revision_form_template = \
+        'admin/fluent_pages/integration/django_reversion/revision_form.html'
+    recover_form_template = \
+        'admin/fluent_pages/integration/django_reversion/recover_form.html'
+
     # Override VersionAdmin._autoregister with customisations to:
     # * register django-parler translation fields and follow relationships
     # * register ContentItems exposed as plugins
@@ -92,17 +97,10 @@ class BaseFluentVersionAdmin(VersionAdmin):
 
 
 class ReversionFlatPageAdminMixin(BaseFluentVersionAdmin):
-
-    revision_form_template = \
-        'admin/fluent_pages/pagetypes/flatpage/reversion/revision_form.html'
-    recover_form_template = \
-        'admin/fluent_pages/pagetypes/flatpage/reversion/recover_form.html'
+    pass
 
 
 class ReversionFluentContentsPageAdminMixin(BaseFluentVersionAdmin):
-
-    revision_form_template = 'admin/fluentpage/reversion/revision_form.html'
-    recover_form_template = 'admin/fluentpage/reversion/recover_form.html'
 
     #: The default template name, which is available in the template context.
     #: Use ``{% extend base_change_form_template %}`` in templates to inherit.
