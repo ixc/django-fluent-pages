@@ -5,7 +5,7 @@ from reversion.admin import VersionAdmin
 from django.conf.urls import patterns, url
 
 
-class FluentReversionAdminMixin(VersionAdmin):
+class ReversionParentAdminMixin(VersionAdmin):
     """
     Admin for use as mixin via settings.FLUENT_PAGES_PARENT_ADMIN_MIXIN to
     apply reversion features when we are working in a "parent" admin context,

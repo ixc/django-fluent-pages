@@ -1,5 +1,5 @@
 from fluent_pages.admin import HtmlPageAdmin
-from fluent_pages.integrations.django_reversion import enable_reversion_support
+from fluent_pages.integration.django_reversion import enable_reversion_support
 
 
 class FlatPageAdmin(HtmlPageAdmin):

@@ -9,6 +9,7 @@ from parler.utils import is_multilingual_project
 from polymorphic_tree.admin import PolymorphicMPTTParentModelAdmin, NodeTypeChoiceForm
 from fluent_pages.models import UrlNode
 from fluent_utils.dry.admin import MultiSiteAdminMixin
+from fluent_pages.integration.django_reversion import enable_reversion_support
 
 
 
@@ -174,3 +175,10 @@ class UrlNodeParentAdmin(MultiSiteAdminMixin, TranslatableAdmin, PolymorphicMPTT
 
 
     make_published.short_description = _("Mark selected objects as published")
+
+
+if enable_reversion_support():
+    # Add reversion-compatible mixing as superclass of admin class
+    # TODO Should probably find a better or more elegant way to do this
+    from fluent_pages.integration.django_reversion.admin_mixins import ReversionParentAdminMixin
+    UrlNodeParentAdmin.__bases__ += (ReversionParentAdminMixin,)
