@@ -14,7 +14,7 @@ class ReversionRealtimeSignalProcessor(RealtimeSignalProcessor):
         django-parler translations, in which case we reload the instance from
         the DB to give the instance a chance to properly re-initialise its
         translated field relationships.
-        
+
         This prevents Haystack from producing errors like the following when
         a page is reverted:
 

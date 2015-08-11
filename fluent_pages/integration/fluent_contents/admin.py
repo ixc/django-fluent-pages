@@ -11,6 +11,7 @@ from fluent_contents.models import ContentItem
 from fluent_pages.adminui import HtmlPageAdmin
 from fluent_contents.analyzer import get_template_placeholder_data
 from fluent_contents.extensions import plugin_pool, PluginNotFound
+from fluent_pages.integration.django_reversion import enable_reversion_support
 
 
 class FluentContentsPageAdmin(PlaceholderEditorAdmin, HtmlPageAdmin):
@@ -113,3 +114,10 @@ class FluentContentsPageAdmin(PlaceholderEditorAdmin, HtmlPageAdmin):
 
         if obj is not None and inlines:
             yield ContentItem.objects.parent(obj, limit_parent_language=False).filter(language_code=language_code)
+
+
+if enable_reversion_support():
+    # Add reversion-compatible mixing as superclass of admin class
+    # TODO Should probably find a better or more elegant way to do this
+    from fluent_pages.integration.django_reversion.admin import ReversionFluentContentsPageAdminMixin
+    FluentContentsPageAdmin.__bases__ += (ReversionFluentContentsPageAdminMixin,)

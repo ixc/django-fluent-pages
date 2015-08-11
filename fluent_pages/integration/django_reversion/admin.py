@@ -2,9 +2,6 @@ from django.conf.urls import patterns, url
 
 from reversion.admin import VersionAdmin
 
-from fluent_pages.integration.fluent_contents import admin as fc_admin
-from fluent_pages.pagetypes.fluentpage.admin import FluentPageAdmin
-from fluent_pages.pagetypes.flatpage.admin import FlatPageAdmin
 from fluent_contents.models import ContentItem, Placeholder
 from fluent_contents.extensions import plugin_pool
 
@@ -94,23 +91,19 @@ class BaseFluentVersionAdmin(VersionAdmin):
             request, version, template_name, extra_context=extra_context)
 
 
-class ReversionFlatPageAdmin(BaseFluentVersionAdmin, FlatPageAdmin):
+class ReversionFlatPageAdminMixin(BaseFluentVersionAdmin):
 
-    revision_form_template = 'admin/fluent_pages/pagetypes/flatpage/reversion/revision_form.html'
-    recover_form_template = 'admin/fluent_pages/pagetypes/flatpage/reversion/recover_form.html'
+    revision_form_template = \
+        'admin/fluent_pages/pagetypes/flatpage/reversion/revision_form.html'
+    recover_form_template = \
+        'admin/fluent_pages/pagetypes/flatpage/reversion/recover_form.html'
 
 
-class ReversionFluentContentsPageAdmin(BaseFluentVersionAdmin,
-                                       fc_admin.FluentContentsPageAdmin):
+class ReversionFluentContentsPageAdminMixin(BaseFluentVersionAdmin):
 
     revision_form_template = 'admin/fluentpage/reversion/revision_form.html'
     recover_form_template = 'admin/fluentpage/reversion/recover_form.html'
 
     #: The default template name, which is available in the template context.
-    #: Use ``{% extend base_change_form_template %}`` in templates to inherit from it.
+    #: Use ``{% extend base_change_form_template %}`` in templates to inherit.
     base_change_form_template = "admin/fluent_pages/page/base_change_form.html"
-
-
-class ReversionFluentPageAdmin(ReversionFluentContentsPageAdmin,
-                               FluentPageAdmin):
-    pass
