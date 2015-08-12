@@ -1,0 +1,40 @@
+{% extends "reversion/recover_list.html" %}
+{% load i18n l10n admin_urls %}
+
+{% comment %}
+Replace whole 'content' block of django-reversion's "reversion/recover_list.html"
+template just to add the `ct_id` parameter to links so they can navigate to
+polymorphic page endpoints.
+
+TODO If there is a better or cleaner way of doing this contribute it to
+https://github.com/etianen/django-reversion/pull/438
+{% endcomment %}
+{% block content %}
+    <div id="content-main">
+        <p>{% blocktrans %}Choose a date from the list below to recover a deleted version of an object.{% endblocktrans %}</p>
+        <div class="module">
+            {% if deleted %}
+                <table id="change-history" class="table table-striped table-bordered">
+                    <thead>
+                    <tr>
+                        <th scope="col">{% trans 'Date/time' %}</th>
+                        <th scope="col">{{opts.verbose_name|capfirst}}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {% for deletion in deleted %}
+                            {% with ct_id=deletion.field_dict.polymorphic_ctype %}
+                            <tr>
+                                <th scope="row"><a href="{% url opts|admin_urlname:'recover' deletion.pk %}{% if ct_id %}?ct_id={{ct_id}}{% endif %}">{{deletion.revision.date_created}}</a></th>
+                                <td>{{deletion.object_repr}}</td>
+                            </tr>
+                            {% endwith %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>{% trans "There are no deleted objects to recover." %}</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

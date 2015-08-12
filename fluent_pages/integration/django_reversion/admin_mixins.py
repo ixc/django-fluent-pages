@@ -7,11 +7,14 @@ from django.conf.urls import patterns, url
 
 class ReversionParentAdminMixin(VersionAdmin):
     """
-    Admin for use as mixin via settings.FLUENT_PAGES_PARENT_ADMIN_MIXIN to
-    apply reversion features when we are working in a "parent" admin context,
-    which is anywhere django-fluent-pages cannot identify the exact page type
-    of the item we are working on.
+    Parent admin mixin with support for versioning, applies reversion features
+    when we are working in a "parent" admin context, which is anywhere
+    django-fluent-pages cannot identify the exact page type of the item we are
+    working on.
     """
+
+    recover_list_template = \
+        'admin/fluent_pages/integration/django_reversion/recover_list.html'
 
     def get_urls(self):
         """
