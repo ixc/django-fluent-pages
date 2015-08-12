@@ -181,4 +181,4 @@ if enable_reversion_support():
     # Add reversion-compatible mixing as superclass of admin class
     # TODO Should probably find a better or more elegant way to do this
     from fluent_pages.integration.django_reversion.admin_mixins import ReversionParentAdminMixin
-    UrlNodeParentAdmin.__bases__ += (ReversionParentAdminMixin,)
+    UrlNodeParentAdmin.__bases__ = (ReversionParentAdminMixin,) + UrlNodeParentAdmin.__bases__
