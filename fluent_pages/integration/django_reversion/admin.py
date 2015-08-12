@@ -13,6 +13,11 @@ class BaseFluentVersionAdmin(VersionAdmin):
     Base class for customizing django-reversion's VersionAdmin for Fluent
     page types.
     """
+    # If this flag is set `get_urls` is hacked to add URL pattern names like
+    # 'fluent_pages_page_recoverlist' etc normally required to show pages in
+    # a polymorphic page listing. Set to false if you have a customised admin
+    # for pages which do not appear in the '/admin/fluent_pages/page/' section.
+    is_grouped_under_fluent_pages_page = True
 
     revision_form_template = \
         'admin/fluent_pages/integration/django_reversion/revision_form.html'
@@ -54,6 +59,9 @@ class BaseFluentVersionAdmin(VersionAdmin):
     # admin which operates in context of a "child" admin.
     def get_urls(self):
         urls = super(BaseFluentVersionAdmin, self).get_urls()
+
+        if not self.is_grouped_under_fluent_pages_page:
+            return urls
 
         # Hack to also register alternate 'fluent_pages_page_XYZ' URL names to
         # work with URL lookups on history/recovery pages from *parent* admin

@@ -18,6 +18,7 @@ class ReversionParentAdminMixin(VersionAdmin):
         Override VersionAdmin.get_urls to return only the URL mappings that
         make sense for a "parent" admin context, namely only listing URLs.
         """
+        # Avoid VersionAdmin.get_urls, go to its superclass instead
         urls = super(VersionAdmin, self).get_urls()
         admin_site = self.admin_site
         opts = self.model._meta
