@@ -23,6 +23,7 @@ class BaseFluentVersionAdmin(VersionAdmin):
         'admin/fluent_pages/integration/django_reversion/revision_form.html'
     recover_form_template = \
         'admin/fluent_pages/integration/django_reversion/recover_form.html'
+    change_list_template = 'reversion/change_list.html'
 
     # Override VersionAdmin._autoregister with customisations to:
     # * register django-parler translation fields and follow relationships
