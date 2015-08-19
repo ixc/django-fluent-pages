@@ -113,3 +113,26 @@ class ReversionFluentContentsPageAdminMixin(BaseFluentVersionAdmin):
     #: The default template name, which is available in the template context.
     #: Use ``{% extend base_change_form_template %}`` in templates to inherit.
     base_change_form_template = "admin/fluent_pages/page/base_change_form.html"
+
+
+class ReversionFluentContentsParentPageAdminMixin(
+        ReversionFluentContentsPageAdminMixin):
+
+    def changeform_view(self, request, object_id, *args, **kwargs):
+        """
+        Look up "real" admin when rendering the change form for a polymorphic
+        parent model, per the logic used for default Django views in
+        PolymorphicParentModelAdmin.
+
+        This is helpful for Fluent Contentes parent classes that do not use the
+        standard Fluent/Flat page admins directly, in which case they seem to
+        lack the ability to use the appropriate polymorphic child admin class
+        when appropriate.
+        """
+        if object_id:
+            real_admin = self._get_real_admin(object_id)
+            return real_admin.changeform_view(
+                request, object_id, *args, **kwargs)
+        else:
+            return super(ReversionFluentContentsPageAdminMixin, self) \
+                .changeform_view(request, object_id, *args, **kwargs)
