@@ -2,6 +2,11 @@ from django.conf.urls import patterns, url
 
 from reversion.admin import VersionAdmin
 
+from django.contrib.admin.utils import quote
+from django.core.urlresolvers import reverse
+from django.db import transaction
+from django.http.response import HttpResponseRedirect
+
 from fluent_contents.models import ContentItem, Placeholder
 from fluent_contents.extensions import plugin_pool
 
@@ -93,6 +98,10 @@ class BaseFluentVersionAdmin(VersionAdmin):
         `version.revision.revert()` which does not properly handle the unusual
         polymorphic content type IDs assigned to MarkupItem variants.
         """
+        # Flag request as being in context of a revert/recover operation, for
+        # lookup later when `changeform_view` is called.
+        request.IS_REVERSION_REQUEST = True
+
         def hack_revision_revert(delete=True):
             obj = version.object
             if obj:
@@ -103,6 +112,35 @@ class BaseFluentVersionAdmin(VersionAdmin):
 
         return super(BaseFluentVersionAdmin, self).revisionform_view(
             request, version, template_name, extra_context=extra_context)
+
+    @transaction.atomic
+    def changeform_view(self, request, object_id, *args, **kwargs):
+        """
+        Override processing of change form when a revert/recover request is
+        submitted to perform a "strict" operation, in order to:
+            * prevent user-submitted form data from causing changes to the data
+              that has just been restored or recovered by
+              `VersionAdmin.revisionform_view`
+            * redirect to the change form of the just reverted/recovered object
+              rather than to the listing page.
+        """
+        # If user is submitting a revert/recover request do not really process
+        # the form data, instead return a redirect back to object's change form
+        if getattr(request, 'IS_REVERSION_REQUEST', False) \
+                and request.method == 'POST':
+            # Seemingly unnecessary save is required here to trigger
+            # reversion's context manager to complete the restore/revert
+            self.model.objects.get(pk=object_id).save()
+
+            opts = self.model._meta
+            object_changeform_url = reverse(
+                "%s:%s_%s_change" % (
+                    self.admin_site.name, opts.app_label, opts.model_name),
+                args=(quote(object_id),))
+            return HttpResponseRedirect(object_changeform_url)
+
+        return super(BaseFluentVersionAdmin, self) \
+            .changeform_view(request, object_id, *args, **kwargs)
 
 
 class ReversionFlatPageAdminMixin(BaseFluentVersionAdmin):
