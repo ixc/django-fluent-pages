@@ -101,6 +101,11 @@ class BaseFluentVersionAdmin(VersionAdmin):
         version.revision._original_revert = version.revision.revert
         version.revision.revert = hack_revision_revert
 
+        # Include admin class's change form template in extra context so the
+        # reversion-specific forms can extend the appropriate change forms.
+        if not 'change_form_template' in extra_context:
+            extra_context['change_form_template'] = self.change_form_template
+
         return super(BaseFluentVersionAdmin, self).revisionform_view(
             request, version, template_name, extra_context=extra_context)
 
