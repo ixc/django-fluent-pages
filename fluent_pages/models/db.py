@@ -589,9 +589,9 @@ class UrlNode_Translation(TranslatedFieldsModel):
         if not self.title and not self.slug:
             # If this empty object gets marked as dirty somehow, avoid corruption of the page tree.
             # The real checks for slug happen in save_translation(), this is only to catch internal state errors.
-            raise RuntimeError("An UrlNode_Transaction object was created without slug or title, blocking save.")
+            raise RuntimeError("An UrlNode_Translation object was created without slug or title, blocking save.")
         if not self._cached_url:
-            raise RuntimeError("An UrlNode_Transaction object was created without cached_url, blocking save.")
+            raise RuntimeError("An UrlNode_Translation object was created without _cached_url, blocking save.")
 
         super(UrlNode_Translation, self).save(*args, **kwargs)
         self._original_cached_url = self._cached_url
@@ -649,8 +649,10 @@ class Page(UrlNode):
         verbose_name_plural = _('Pages')
 
     def __str__(self):
-        # self.title is configured with any_language=True, so always returns a value.
-        return self.title or self.safe_translation_getter('slug', u"#{0}".format(self.pk), any_language=True)
+        # Even through self.title is configured with any_language=True to always return a value,
+        # this will still fail for situations where a Page() is created without having a language at all.
+        return self.safe_translation_getter('title', any_language=True) \
+               or self.safe_translation_getter('slug', u"#{0}".format(self.pk), any_language=True)
 
     # Make PyCharm happy
     # Not reusing UrlNode.objects, as contribute_to_class will change the QuerySet.model value.
@@ -674,6 +676,10 @@ class HtmlPage(Page):
         meta_keywords = models.CharField(_('keywords'), max_length=255, blank=True, null=True),
         meta_description = models.CharField(_('description'), max_length=255, blank=True, null=True),
         meta_title = models.CharField(_('page title'), max_length=255, blank=True, null=True, help_text=_("When this field is not filled in, the menu title text will be used.")),
+        meta = dict(
+            verbose_name = _("SEO Translation"),
+            verbose_name_plural = _("SEO Translations"),
+        )
     )
 
     class Meta:
@@ -698,7 +704,6 @@ class HtmlPage(Page):
         # because the FK points to a proxy model. This is a workaround for:
         # https://code.djangoproject.com/ticket/18491
         # https://code.djangoproject.com/ticket/16128
-        # By using .all() we avoid the get_query_set/get_queryset() difference.
         self.seo_translations.all().delete()  # Accesses RelatedManager
 
         # Continue regular delete.
