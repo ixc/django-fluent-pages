@@ -55,6 +55,7 @@ setup(
         'flatpage': ['django-wysiwyg>=0.7.0'],
         'fluentpage': ['django-fluent-contents>=1.0'],
         'redirectnode': ['django-any-urlfield>=2.1'],  # Needs Pickle support for translated new_url field.
+        'reversion': ['django-reversion>=1.9.3'],
     },
     description='A flexible, scalable CMS with custom node types, and flexible block content.',
     long_description=read('README.rst'),
