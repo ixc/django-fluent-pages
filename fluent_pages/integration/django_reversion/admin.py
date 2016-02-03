@@ -97,13 +97,16 @@ class BaseFluentVersionAdmin(VersionAdmin):
             obj = version.object
             if obj:
                 obj.delete()
+            # Cache existing object for later reference, as later lookups via
+            # the `object` property will fail now it is deleted
+            version.revision._existing_object = obj
             version.revision._original_revert()
         version.revision._original_revert = version.revision.revert
         version.revision.revert = hack_revision_revert
 
         # Include admin class's change form template in extra context so the
         # reversion-specific forms can extend the appropriate change forms.
-        if not 'change_form_template' in extra_context:
+        if 'change_form_template' not in extra_context:
             extra_context['change_form_template'] = self.change_form_template
 
         return super(BaseFluentVersionAdmin, self).revisionform_view(
