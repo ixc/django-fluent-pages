@@ -6,6 +6,7 @@ from fluent_contents.models import ContentItem, Placeholder
 from fluent_contents.extensions import plugin_pool
 
 from .utils import FluentVersionAdapter
+from .models import pre_revisionform_view, post_revisionform_view
 
 
 class BaseFluentVersionAdmin(VersionAdmin):
@@ -87,30 +88,25 @@ class BaseFluentVersionAdmin(VersionAdmin):
     def revisionform_view(self, request, version, template_name,
                           extra_context=None):
         """
-        Override handling of reversion's revert-with-delete to instead delete
-        entire object. We must do this to clean up obsolete relationships
-        rather than relying on django-reversion's `delete=True` flag to
-        `version.revision.revert()` which does not properly handle the unusual
-        polymorphic content type IDs assigned to MarkupItem variants.
+        Override revert/recover view to send signals so we can hook in custom
+        processing, and adjust template settings etc.
         """
-        def hack_revision_revert(delete=True):
-            obj = version.object
-            if obj:
-                obj.delete()
-            # Cache existing object for later reference, as later lookups via
-            # the `object` property will fail now it is deleted
-            version.revision._existing_object = obj
-            version.revision._original_revert()
-        version.revision._original_revert = version.revision.revert
-        version.revision.revert = hack_revision_revert
+        # Send the pre_revisionform_view signal.
+        pre_revisionform_view.send(self, request=request, version=version)
 
         # Include admin class's change form template in extra context so the
         # reversion-specific forms can extend the appropriate change forms.
         if 'change_form_template' not in extra_context:
             extra_context['change_form_template'] = self.change_form_template
 
-        return super(BaseFluentVersionAdmin, self).revisionform_view(
+        response = super(BaseFluentVersionAdmin, self).revisionform_view(
             request, version, template_name, extra_context=extra_context)
+
+        # Send the post_revisionform_view signal.
+        post_revisionform_view.send(
+            self, request=request, version=version, response=response)
+
+        return response
 
 
 class ReversionFlatPageAdminMixin(BaseFluentVersionAdmin):
