@@ -35,8 +35,12 @@ def find_version(*parts):
 
 setup(
     name='django-fluent-pages',
-    version=find_version('fluent_pages', '__init__.py'),
+    #version=find_version('fluent_pages', '__init__.py'),
     license='Apache 2.0',
+
+    # Devpi setup for IC
+    use_scm_version={'version_scheme': 'post-release'},  # Get version from git tags.
+    setup_requires=['setuptools_scm'],
 
     install_requires=[
         'django-fluent-utils>=1.1.4',      # DRY utility code
