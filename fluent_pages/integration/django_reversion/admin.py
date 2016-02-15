@@ -91,8 +91,16 @@ class BaseFluentVersionAdmin(VersionAdmin):
         Override revert/recover view to send signals so we can hook in custom
         processing, and adjust template settings etc.
         """
-        # Send the pre_revisionform_view signal.
-        pre_revisionform_view.send(self, request=request, version=version)
+        # Send the pre_revisionform_view signal at beginning of process via
+        # a reversion hack to ensure any changes we make are performed within
+        # the atomic transaction internal to `VersionAdmin.revisionform_view`.
+        def hack_revision_revert(delete=True):
+            # Send our signal to perform custom pre-processing
+            pre_revisionform_view.send(self, request=request, version=version)
+            # Call original implementation to do the actual work
+            version.revision._original_revert()
+        version.revision._original_revert = version.revision.revert
+        version.revision.revert = hack_revision_revert
 
         # Include admin class's change form template in extra context so the
         # reversion-specific forms can extend the appropriate change forms.
