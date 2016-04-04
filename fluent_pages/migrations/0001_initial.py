@@ -148,4 +148,8 @@ class Migration(migrations.Migration):
             name='htmlpagetranslation',
             unique_together=set([('language_code', 'master')]),
         ),
+        migrations.AlterModelOptions(
+            name='htmlpagetranslation',
+            options={'default_permissions': (), 'verbose_name': 'SEO Translation', 'managed': True, 'verbose_name_plural': 'SEO Translations'},
+        ),
     ]
