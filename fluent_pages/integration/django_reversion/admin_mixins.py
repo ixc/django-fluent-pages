@@ -13,6 +13,17 @@ class ReversionParentAdminMixin(VersionAdmin):
     working on.
     """
 
+    @property
+    def change_list_template(self):
+        # Prevent reversion from overriding the change_list template with its
+        # own if there are other classes in the MRO that want precedence. Note
+        # how super() is called on VersionAdmin, and not this class.
+        templates = super(VersionAdmin, self).change_list_template
+        if isinstance(templates, basestring):
+            templates = [templates]
+        templates.insert(-1, 'reversion/change_list.html')
+        return templates
+
     recover_list_template = \
         'admin/fluent_pages/integration/django_reversion/recover_list.html'
 
