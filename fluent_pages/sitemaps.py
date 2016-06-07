@@ -10,18 +10,20 @@ This can be done using:
         'pages': PageSitemap,
     }
 
-    urlpatterns += patterns('',
+    urlpatterns += [
         url(r'^sitemap.xml$', 'django.contrib.sitemaps.views.sitemap', {'sitemaps': sitemaps}),
-    )
+    ]
 """
 from django.contrib.sitemaps import Sitemap
 from fluent_pages.models import UrlNode
+
 
 class PageSitemap(Sitemap):
     """
     The sitemap definition for the pages created with *django-fluent-pages*.
     It follows the API for the :mod:`django.contrib.sitemaps <django.contrib.sitemaps>` module.
     """
+
     def items(self):
         """
         Return all items of the sitemap.

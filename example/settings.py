@@ -28,6 +28,7 @@ SITE_ID = 1
 
 USE_I18N = True
 USE_L10N = True
+USE_TZ = True
 
 MEDIA_ROOT = join(dirname(__file__), "media")
 MEDIA_URL = '/media/'
@@ -74,6 +75,10 @@ TEMPLATE_DIRS = (
     join(dirname(__file__), "templates"),
 )
 
+FIXTURE_DIRS = (
+    join(dirname(__file__), "fixtures"),
+)
+
 FLUENT_PAGES_TEMPLATE_DIR = join(dirname(__file__), "theme1", "templates")
 
 INSTALLED_APPS = (
@@ -102,6 +107,7 @@ INSTALLED_APPS = (
     'polymorphic',
     'polymorphic_tree',
     'parler',
+    'slug_preview',
 
     # Content for fluentpage, with plugins that have no extra configuration requirements
     'fluent_contents',
@@ -116,7 +122,7 @@ INSTALLED_APPS = (
     'tinymce',
 )
 
-if django.VERSION < (1,7):
+if django.VERSION < (1, 7):
     INSTALLED_APPS += (
         # For DB upgrades
         'south',

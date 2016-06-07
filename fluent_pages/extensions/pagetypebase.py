@@ -12,17 +12,21 @@ from django.core.urlresolvers import RegexURLResolver
 from django.db import DatabaseError
 from django.template.response import TemplateResponse
 from django.utils.functional import SimpleLazyObject
-from django.utils.importlib import import_module
 
 from fluent_pages import appsettings
 from fluent_pages.adminui import PageAdmin
 
 from six import string_types
 
+try:
+    from importlib import import_module
+except ImportError:
+    from django.utils.importlib import import_module  # Python 2.6
+
+
 __all__ = (
     'PageTypePlugin',
 )
-
 
 
 class PageTypePlugin(with_metaclass(forms.MediaDefiningClass, object)):
@@ -99,15 +103,12 @@ class PageTypePlugin(with_metaclass(forms.MediaDefiningClass, object)):
     #: The sorting priority for the page type in the "Add Page" dialog of the admin.
     sort_priority = 100
 
-
     def __init__(self):
         self._type_id = None
         self._url_resolver = None
 
-
     def __repr__(self):
         return '<{0} for {1} model>'.format(self.__class__.__name__, str(self.model.__name__).encode('ascii'))
-
 
     @property
     def verbose_name(self):
@@ -116,14 +117,12 @@ class PageTypePlugin(with_metaclass(forms.MediaDefiningClass, object)):
         """
         return self.model._meta.verbose_name
 
-
     @property
     def type_name(self):
         """
         Return the class name of the model, this is mainly provided for templates.
         """
         return self.model.__name__
-
 
     @property
     def type_id(self):
@@ -137,13 +136,11 @@ class PageTypePlugin(with_metaclass(forms.MediaDefiningClass, object)):
                 raise DatabaseError("Unable to fetch ContentType object, is a plugin being registered before the initial syncdb? (original error: {0})".format(str(e)))
         return self._type_id
 
-
     def get_model_instances(self):
         """
         Return all :class:`~fluent_pages.models.Page` instances that are has created using this page types.
         """
         return self.model.objects.all()
-
 
     def get_response(self, request, page, **kwargs):
         """
@@ -164,14 +161,12 @@ class PageTypePlugin(with_metaclass(forms.MediaDefiningClass, object)):
             context = context,
         )
 
-
     def get_render_template(self, request, page, **kwargs):
         """
         Return the template to render for the specific `page` or `request`,
         By default it uses the :attr:`render_template` attribute.
         """
         return self.render_template
-
 
     def get_context(self, request, page, **kwargs):
         """
@@ -188,14 +183,12 @@ class PageTypePlugin(with_metaclass(forms.MediaDefiningClass, object)):
             'site': SimpleLazyObject(lambda: page.parent_site),  # delay query until read
         }
 
-
     def get_view_response(self, request, page, view_func, view_args, view_kwargs):
         """
         Render the custom view that was exposed by the extra plugin URL patterns.
         This gives the ability to add extra middleware logic.
         """
         return view_func(request, *view_args, **view_kwargs)
-
 
     def get_url_resolver(self):
         """

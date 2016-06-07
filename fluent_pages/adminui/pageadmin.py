@@ -1,3 +1,5 @@
+import django
+
 native_str = str  # no future.builtins.str, breaks default_change_form_template in Django 1.5, Python 2.7.5
 from future.builtins import int
 import copy
@@ -65,10 +67,8 @@ class DefaultPageChildAdmin(UrlNodeChildAdmin):
     #: Use ``{% extend base_change_form_template %}`` in templates to inherit from it.
     base_change_form_template = "admin/fluent_pages/page/base_change_form.html"
 
-
     class Media:
         js = ('fluent_pages/admin/django13_fk_raw_id_fix.js',)
-
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         field = super(DefaultPageChildAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
@@ -81,10 +81,12 @@ class DefaultPageChildAdmin(UrlNodeChildAdmin):
         # It also partially fixes Django 1.3, which would wrongly point the url to ../../../fluent_pages/urlnode/ otherwise.
         if db_field.name == 'parent' and isinstance(field.widget, ForeignKeyRawIdWidget):
             field.widget.rel = copy.copy(field.widget.rel)
-            field.widget.rel.to = Page
+            if django.VERSION >= (1, 9):
+                field.widget.rel.model = Page
+            else:
+                field.widget.rel.to = Page
 
         return field
-
 
     @property
     def change_form_template(self):
@@ -116,6 +118,8 @@ _lazy_get_default_change_form_template = lazy(_get_default_change_form_template,
 
 
 _cached_name_lookups = {}
+
+
 def _select_template_name(template_name_list):
     """
     Given a list of template names, find the first one that exists.

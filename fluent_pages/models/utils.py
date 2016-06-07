@@ -36,11 +36,10 @@ class DecoratingQuerySet(QuerySet):
         super(DecoratingQuerySet, self).__init__(*args, **kwargs)
         self._decorate_funcs = []
 
-    def _clone(self, klass=None, setup=False, **kw):
-        c = super(DecoratingQuerySet, self)._clone(klass, setup, **kw)
+    def _clone(self, *args, **kwargs):
+        c = super(DecoratingQuerySet, self)._clone(*args, **kwargs)
         c._decorate_funcs = self._decorate_funcs
         return c
-
 
     def decorate(self, fn):
         """
@@ -49,7 +48,6 @@ class DecoratingQuerySet(QuerySet):
         if fn not in self._decorate_funcs:
             self._decorate_funcs.append(fn)
         return self
-
 
     def iterator(self):
         """
@@ -68,8 +66,9 @@ class DecoratorManager(models.Manager):
     """
     The manager class which ensures the enhanced DecoratorQuerySet object is used.
     """
+
     def get_queryset(self):
         return DecoratingQuerySet(self.model, using=self._db)
 
-    if django.VERSION < (1,8):
+    if django.VERSION < (1, 8):
         get_query_set = get_queryset

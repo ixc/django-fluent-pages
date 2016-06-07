@@ -1,22 +1,49 @@
 Changelog
 =========
 
-Changes in git
---------------
+Changes in 1.0b3 (2016-05-17)
+-----------------------------
 
+* Fixed showing "View on site" link for draft pages, since staff has access to it.
+* Fixed ``node.is_child_active`` for selected parent menu's.
+* Fixed applying ``FLUENT_PAGES_FILTER_SITE_ID`` setting in the admin.
+* Improved ``RobotsTxtView`` to handle ``i18n_patterns()`` automatically.
+
+
+Changes in 1.0b2 (2016-02-23)
+-----------------------------
+
+* Fixed published admin icon for Django 1.9
+* Fixed truncating long ``db_table`` names.
+* Added ``class="active"`` in the default menu template for menu's where a child item is active.
+* Added automatic configuration for django-staff-toolbar_.
+
+
+Changes in version 1.0b1 (2015-12-30)
+-------------------------------------
+
+* Added Django 1.9 support
+* Added translation support to the ``fluent_pages.pagetypes.textfile`` type, to translate the content (but not the type).
 * Added ``draft`` CSS class to unpublished menu items that are only visible for staff members.
 * Added ``FluentPagesConfig`` to use Django 1.7 appconfigs.
 * Added multiple fallback language support for django-parler_ 1.5.
+* Added ``make_language_redirects`` management command for redirecting an unmaintained language to another.
+* Added ``is_child_active`` variable in ``PageNavigationNode`` for menu templates.
+* Added django-slug-preview_ for nicer slug appearance in the admin.
 * Improve error messages when URLs can't be created.
 * Improve performance of ``PageSitemap`` for sites with a lot of pages.
 * Temporary fix: Block moving pages to untranslated sub nodes, until a design decision can be made how to handle this.
 * Temporary fix: Hide subpages when searching in the admin, to avoid errors with partial MPTT trees.
 * Fixed Django 1.8 issues in the "Change Page" view.
+* Fixed migrations to prevent Django from creating additional ones when settings change.
 * Fixed silent behavior of using ``.parent_site()`` too late in an already filtered queryset.
 * Fixed unicode handling in ``rebuild_page_tree``.
 * Fixed importing ``mixed_reverse_lazy()`` from django settings.
 * Fixed showing pages when there is no translation is created yet.
 * Fixed JavaScript event binding for dynamic related-lookup fields.
+* Fixed ``welcome.json`` fixture
+* Dropped Django 1.4 and Python 3.2 support.
+* **Backwards incompatible:** The ``FluentPageBase`` class is now removed, use ``AbstractFluentPage`` instead.
 
 
 Changes in version 0.9
@@ -29,7 +56,7 @@ Changes in version 0.9
 * Fix behavior of ``Page.objects.language(..).get_for_path()`` and ``best_match_for_path()``, use the currently selected language.
   This is similar to django-parler_'s ``TranslatableModel.objects.language(..).create(..)`` support.
 * Fix skipping mount-points in ``app_reverse()`` when the root is not translated.
-* *Backwards incompatible* with previous beta releases: split the ``fluent_pages.integration.fluent_contents`` package.
+* **Backwards incompatible** with previous beta releases: split the ``fluent_pages.integration.fluent_contents`` package.
   You'll need to import from the ``.models.``, ``.admin`` and ``.page_type_plugins`` explicitly.
   This removes many cases where projects suffered from circular import errors.
 
@@ -250,4 +277,6 @@ First public release
 .. _django-mptt: https://github.com/django-mptt/django-mptt
 .. _django-parler: https://github.com/edoburu/django-parler
 .. _django-polymorphic-tree: https://github.com/edoburu/django-polymorphic-tree
+.. _django-slug-preview: https://github.com/edoburu/django-slug-preview
+.. _django-staff-toolbar: https://github.com/edoburu/django-staff-toolbar
 .. _django-tag-parser: https://github.com/edoburu/django-tag-parser

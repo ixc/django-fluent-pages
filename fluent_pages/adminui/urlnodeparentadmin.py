@@ -12,7 +12,6 @@ from fluent_utils.dry.admin import MultiSiteAdminMixin
 from fluent_pages.integration.django_reversion import enable_reversion_support
 
 
-
 class PageTypeChoiceForm(NodeTypeChoiceForm):
     type_label = _("Page type")
 
@@ -43,7 +42,7 @@ class UrlNodeParentAdmin(MultiSiteAdminMixin, TranslatableAdmin, PolymorphicMPTT
     The internal machinery
     The admin screen for the ``UrlNode`` objects.
     """
-    filter_sites = appsettings.FLUENT_PAGES_FILTER_SITE_ID
+    filter_site = appsettings.FLUENT_PAGES_FILTER_SITE_ID
     base_model = UrlNode
     add_type_form = PageTypeChoiceForm
 
@@ -61,7 +60,6 @@ class UrlNodeParentAdmin(MultiSiteAdminMixin, TranslatableAdmin, PolymorphicMPTT
             'screen': ('fluent_pages/admin/pagetree.css',)
         }
 
-
     # ---- Polymorphic tree overrides ----
 
     def get_child_models(self):
@@ -74,7 +72,6 @@ class UrlNodeParentAdmin(MultiSiteAdminMixin, TranslatableAdmin, PolymorphicMPTT
         for plugin in page_type_pool.get_plugins():
             child_models.append((plugin.model, plugin.model_admin))
         return child_models
-
 
     def get_child_type_choices(self, request=None, action=None):
         """
@@ -93,11 +90,9 @@ class UrlNodeParentAdmin(MultiSiteAdminMixin, TranslatableAdmin, PolymorphicMPTT
         choices.sort(key=lambda choice: (priorities[choice[0]], choice[1]))
         return choices
 
-
     # Provide some migration assistance for the users of the 0.8.1 alpha release:
     def get_child_model_classes(self):
         raise DeprecationWarning("Please upgrade django-polymorphic-tree to 0.8.2 to use this version of django-fluent-pages.")
-
 
     # ---- parler overrides ----
 
@@ -107,31 +102,33 @@ class UrlNodeParentAdmin(MultiSiteAdminMixin, TranslatableAdmin, PolymorphicMPTT
         real_admin = self._get_real_admin(object_id)
         return real_admin.delete_translation(request, object_id, language_code)
 
-
     # ---- List code ----
 
     # NOTE: the regular results table is replaced client-side with a jqTree list.
     # When making changes to the list, test both the JavaScript and non-JavaScript variant.
     # The jqTree variant still uses the server-side rendering for the colums.
 
-    STATUS_ICONS = (
-        (UrlNode.PUBLISHED, 'icon-yes.gif'),
-        (UrlNode.DRAFT,     'icon-unknown.gif'),
-    )
+    if django.VERSION >= (1, 9):
+        STATUS_ICONS = (
+            (UrlNode.PUBLISHED, 'admin/img/icon-yes.svg'),
+            (UrlNode.DRAFT,     'admin/img/icon-unknown.svg'),
+        )
+    else:
+        STATUS_ICONS = (
+            (UrlNode.PUBLISHED, 'admin/img/icon-yes.gif'),
+            (UrlNode.DRAFT,     'admin/img/icon-unknown.gif'),
+        )
 
     def status_column(self, urlnode):
         status = urlnode.status
         title = [rec[1] for rec in UrlNode.STATUSES if rec[0] == status].pop()
         icon  = [rec[1] for rec in self.STATUS_ICONS if rec[0] == status].pop()
-        if django.VERSION >= (1, 4):
-            admin = settings.STATIC_URL + 'admin/img/'
-        else:
-            admin = settings.ADMIN_MEDIA_PREFIX + 'img/admin/'
-        return u'<img src="{admin}{icon}" width="10" height="10" alt="{title}" title="{title}" />'.format(admin=admin, icon=icon, title=title)
+        return u'<img src="{static_url}{icon}" alt="{title}" title="{title}" />'.format(
+            static_url=settings.STATIC_URL, icon=icon, title=title
+        )
 
     status_column.allow_tags = True
     status_column.short_description = _('Status')
-
 
     def can_preview_object(self, urlnode):
         """ Override whether the node can be previewed. """
@@ -146,13 +143,11 @@ class UrlNodeParentAdmin(MultiSiteAdminMixin, TranslatableAdmin, PolymorphicMPTT
         else:
             return True
 
-
     def get_language_short_title(self, language_code):
         """
         Turn the language code to uppercase.
         """
         return language_code.upper()
-
 
     def get_search_results(self, request, queryset, search_term):
         # HACK: make sure MPTT doesn't cause errors when finding sub-level results.
@@ -160,7 +155,6 @@ class UrlNodeParentAdmin(MultiSiteAdminMixin, TranslatableAdmin, PolymorphicMPTT
         if search_term:
             queryset = queryset.filter(level=0)
         return super(UrlNodeParentAdmin, self).get_search_results(request, queryset, search_term)
-
 
     # ---- Bulk actions ----
 
@@ -172,7 +166,6 @@ class UrlNodeParentAdmin(MultiSiteAdminMixin, TranslatableAdmin, PolymorphicMPTT
         else:
             message = "{0} pages were marked as published.".format(rows_updated)
         self.message_user(request, message)
-
 
     make_published.short_description = _("Mark selected objects as published")
 

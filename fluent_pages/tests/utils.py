@@ -1,3 +1,4 @@
+import django
 from future.builtins import str
 from six import iteritems
 from functools import wraps
@@ -5,12 +6,15 @@ from django.conf import settings, UserSettingsHolder
 from django.core.management import call_command
 from django.core.urlresolvers import get_script_prefix, set_script_prefix
 from django.contrib.sites.models import Site
-from django.db.models import loading
 from django.test import TestCase
-from django.utils.importlib import import_module
 from fluent_pages.models.db import UrlNode
 from fluent_utils.django_compat import get_user_model
 import os
+
+try:
+    from importlib import import_module
+except ImportError:
+    from django.utils.importlib import import_module  # Python 2.6
 
 
 class AppTestCase(TestCase):
@@ -22,13 +26,11 @@ class AppTestCase(TestCase):
         'fluent_pages.tests.testapp',
     )
 
-
     @classmethod
     def setUpClass(cls):
         super(AppTestCase, cls).setUpClass()
 
         # Avoid early import, triggers AppCache
-        from django.template.loaders import app_directories
         User = get_user_model()
 
         if cls.install_apps:
@@ -40,26 +42,36 @@ class AppTestCase(TestCase):
                     settings.INSTALLED_APPS = (appname,) + tuple(settings.INSTALLED_APPS)
                     run_syncdb = True
 
-                    # Flush caches
                     testapp = import_module(appname)
-                    loading.cache.loaded = False
-                    app_directories.app_template_dirs += (
-                        os.path.join(os.path.dirname(testapp.__file__), 'templates'),
-                    )
+
+                    # Flush caches
+                    if django.VERSION < (1, 9):
+                        from django.template.loaders import app_directories
+                        from django.db.models import loading
+                        loading.cache.loaded = False
+
+                        app_directories.app_template_dirs += (
+                            os.path.join(os.path.dirname(testapp.__file__), 'templates'),
+                        )
+                    else:
+                        from django.template.utils import get_app_template_dirs
+                        get_app_template_dirs.cache_clear()
 
             if run_syncdb:
-                call_command('syncdb', verbosity=0)  # may run south's overlaid version
+                if django.VERSION < (1, 7):
+                    call_command('syncdb', verbosity=0)  # may run south's overlaid version
+                else:
+                    call_command('migrate', verbosity=0)
 
         # Create basic objects
         # 1.4 does not create site automatically with the defined SITE_ID, 1.3 does.
         Site.objects.get_or_create(id=settings.SITE_ID, defaults=dict(domain='django.localhost', name='django at localhost'))
-        cls.user, _ = User.objects.get_or_create(is_superuser=True, is_staff=True, username="admin")
+        cls.user, _ = User.objects.get_or_create(is_superuser=True, is_staff=True, username="fluent-pages-admin")
 
         # Create tree.
         # Reset data first because the testcase class setup runs outside the transaction
         UrlNode.objects.all().delete()
         cls.setUpTree()
-
 
     @classmethod
     def setUpTree(cls):
@@ -68,7 +80,6 @@ class AppTestCase(TestCase):
         """
         pass
 
-
     def assert200(self, url, msg_prefix=''):
         """
         Test that an URL exists.
@@ -76,7 +87,6 @@ class AppTestCase(TestCase):
         if msg_prefix:
             msg_prefix += ": "
         self.assertEqual(self.client.get(url).status_code, 200, str(msg_prefix) + u"Page at {0} should be found.".format(url))
-
 
     def assert404(self, url, msg_prefix=''):
         """
@@ -98,6 +108,7 @@ except ImportError:
         it's used with the ``with`` statement. In either event entering/exiting
         are called before and after, respectively, the function/block is executed.
         """
+
         def __init__(self, **kwargs):
             self.options = kwargs
             self.wrapped = settings._wrapped
@@ -113,9 +124,11 @@ except ImportError:
             if isinstance(test_func, type) and issubclass(test_func, TransactionTestCase):
                 original_pre_setup = test_func._pre_setup
                 original_post_teardown = test_func._post_teardown
+
                 def _pre_setup(innerself):
                     self.enable()
                     original_pre_setup(innerself)
+
                 def _post_teardown(innerself):
                     original_post_teardown(innerself)
                     self.disable()
@@ -165,11 +178,9 @@ class script_name(override_settings):
         self.newpath = newpath
         self.oldprefix = get_script_prefix()
 
-
     def enable(self):
         super(script_name, self).enable()
         set_script_prefix(self.newpath)
-
 
     def disable(self):
         super(script_name, self).disable()

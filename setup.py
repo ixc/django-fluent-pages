@@ -43,11 +43,12 @@ setup(
     setup_requires=['setuptools_scm'],
 
     install_requires=[
-        'django-fluent-utils>=1.1.4',      # DRY utility code
+        'django-fluent-utils>=1.2.3',      # DRY utility code
         'django-mptt>=0.5.5',              # Still supporting Django 1.5, use mptt 0.6 for Python 3 support.
-        'django-parler>=1.4',              # Needed for Django 1.8 compatibility
-        'django-polymorphic>=0.7',         # Needed for Django 1.8 compatibility
-        'django-polymorphic-tree>=1.1',    # Enforce Python 3 compatible versions
+        'django-parler>=1.6.1',            # Needed for Django 1.9 compatibility
+        'django-polymorphic>=0.9.1',       # Needed for Django 1.8 compatibility
+        'django-polymorphic-tree>=1.2.3',  # Needed for Django 1.9 compatibility
+        'django-slug-preview>=1.0.1',
         'django-tag-parser>=2.1',
         'future>=0.12.2',
         'six>=1.5.2',
@@ -56,10 +57,9 @@ setup(
         'Django (>=1.5)',
     ],
     extras_require={
-        'flatpage': ['django-wysiwyg>=0.7.0'],
-        'fluentpage': ['django-fluent-contents>=1.0'],
-        'redirectnode': ['django-any-urlfield>=2.1'],  # Needs Pickle support for translated new_url field.
-        'reversion': ['django-reversion>=1.9.3'],
+        'flatpage': ['django-wysiwyg>=0.7.1'],
+        'fluentpage': ['django-fluent-contents>=1.1'],
+        'redirectnode': ['django-any-urlfield>=2.2'],  # Needs Pickle support for translated new_url field.
     },
     description='A flexible, scalable CMS with custom node types, and flexible block content.',
     long_description=read('README.rst'),
